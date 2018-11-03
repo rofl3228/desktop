@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 
 namespace DesktopApp
 {
@@ -19,11 +20,43 @@ namespace DesktopApp
             InitializeComponent();
         }
 
+        public string CalculateMD5Hash(string input)
+
+        {
+
+            // step 1, calculate MD5 hash from input
+
+            MD5 md5 = System.Security.Cryptography.MD5.Create();
+
+            byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
+
+            byte[] hash = md5.ComputeHash(inputBytes);
+
+
+            // step 2, convert byte array to hex string
+
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < hash.Length; i++)
+
+            {
+
+                sb.Append(hash[i].ToString("X2"));
+
+            }
+
+            return sb.ToString();
+
+        }
+
+
+
         private void label1_Click(object sender, EventArgs e)
         {
             
         }
 
+        string[] input;
         static int port = 1500;
         static string addres = "185.227.111.201";
         
@@ -44,7 +77,7 @@ namespace DesktopApp
 
             socket.Connect(ipPoint);
             if(socket.Connected) Consist.Text = "Connected";
-            string authData = "login " + LoginBox.Text + ";password " + PassBox.Text;
+            string authData = "login " + LoginBox.Text + ";password " + CalculateMD5Hash(PassBox.Text);
             byte[] data = Encoding.Unicode.GetBytes(authData);
             socket.Send(data);
             if(socket.SendBufferSize > 0)Consist.Text = "Recived";
@@ -60,17 +93,34 @@ namespace DesktopApp
             while (socket.Available > 0);
             string answer = builder.ToString();
 
-            Debug.Text = answer;
+            //Debug.Text = answer;
 
-            string[] input = answer.Split(new char[] { ' ' });
+            input = answer.Split(new char[] { ' ' });
             if(input[0] == "token" && input[1] != "null")
             {
                 StatusLable.Text = "Вход выполнен";
-                Debug.Visible = false;
+                loginPanel.Visible = false;
+                loginPanel.Enabled = false;
+                authPanel.Enabled = true;
+                authPanel.Visible = true;
             }
 
             socket.Shutdown(SocketShutdown.Both);
             socket.Close();
+        }
+
+        private void Authication_TextChanged(object sender, EventArgs e)
+        {
+            if(Authication.Text == input[3])
+            {
+                authPanel.Visible = false;
+                authPanel.Enabled = false;
+            }
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
