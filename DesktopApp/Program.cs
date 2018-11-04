@@ -14,9 +14,11 @@ namespace DesktopApp
         [STAThread]
         static void Main()
         {
+            string token;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+
+            Application.Run(new MainForm());
         }
     }
 }
